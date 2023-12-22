@@ -7,5 +7,5 @@ app = FastAPI()
 app.include_router(satlocation.router, prefix="/satlocation")
 
 def main(req: func.HttpRequest, context:func.Context) -> func.HttpResponse:
-    return func.AsgiMiddleware(app).handle_async(req)
+    return func.AsgiMiddleware(app).handle(req)
 
