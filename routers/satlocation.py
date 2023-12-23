@@ -2,11 +2,10 @@ import logging
 from fastapi import APIRouter, Request, Response, Depends, HTTPException, status
 from fastapi.security import APIKeyQuery,OAuth2PasswordBearer
 from fastapi_microsoft_identity import initialize, requires_auth, AuthError, validate_scope
-
+import requests
+import ephem
 
 api_key_query = APIKeyQuery(name="api_key", auto_error=True)
-
-
 
 
 router = APIRouter()
@@ -27,7 +26,90 @@ def validate_api_key(api_key: str = Depends(api_key_query)):
 @requires_auth(expected_scope)
 @router.get("/{satellite_id}")
 async def get_satellite_location(satellite_id: str, api_key: str = Depends(validate_api_key)):
-    try:
-        return {"satellite_id": satellite_id, "location": "1.2, 103.5"}
-    except AuthError as e:
-        return Response(status_code=e.status_code, content=e.message)
+    if satellite_id.upper() == "ISS":
+        try:
+            try:
+                url = 'https://tle.ivanstanojevic.me/api/tle/25544?api_key=8rsVZgPU1iY5192hd4DPbC1rXv8VEU4eQX432HNl'
+                response = requests.get(url)
+                data = response.json()
+                line1 = data['line1']
+                line2 = data['line2']
+                satellite = ephem.readtle('ISS', line1, line2)
+                time = ephem.now()
+                time = ephem.localtime(time)
+                satellite.compute(time)
+            except Exception as e:
+                return Response(status_code=500, content=str(e))    
+            return {"satellite": satellite_id, "location": {"latitude": str(satellite.sublat), "longitude": str(satellite.sublong), "timestamp": str(time)}}
+        except AuthError as e:
+            return Response(status_code=e.status_code, content=e.message)
+    elif satellite_id.upper() == "SUCHAI":
+        try:
+            try:
+                url = 'https://tle.ivanstanojevic.me/api/tle/42788?api_key=8rsVZgPU1iY5192hd4DPbC1rXv8VEU4eQX432HNl'
+                response = requests.get(url)
+                data = response.json()
+                line1 = data['line1']
+                line2 = data['line2']
+                satellite = ephem.readtle('SUCHAI', line1, line2)
+                time = ephem.now()
+                time = ephem.localtime(time)
+                satellite.compute(time)
+            except Exception as e:
+                return Response(status_code=500, content=str(e))    
+            return {"satellite": satellite_id, "location": {"latitude": str(satellite.sublat), "longitude": str(satellite.sublong), "timestamp": str(time)}}
+        except AuthError as e:
+            return Response(status_code=e.status_code, content=e.message)
+    elif satellite_id.upper() == "SUCHAI-2":
+        try:
+            try:
+                url = 'https://tle.ivanstanojevic.me/api/tle/52192?api_key=8rsVZgPU1iY5192hd4DPbC1rXv8VEU4eQX432HNl'
+                response = requests.get(url)
+                data = response.json()
+                line1 = data['line1']
+                line2 = data['line2']
+                satellite = ephem.readtle('SUCHAI-2', line1, line2)
+                time = ephem.now()
+                time = ephem.localtime(time)
+                satellite.compute(time)
+            except Exception as e:
+                return Response(status_code=500, content=str(e))    
+            return {"satellite": satellite_id, "location": {"latitude": str(satellite.sublat), "longitude": str(satellite.sublong), "timestamp": str(time)}}
+        except AuthError as e:
+            return Response(status_code=e.status_code, content=e.message)
+    elif satellite_id.upper() == "SUCHAI-3":
+        try:
+            try:
+                url = 'https://tle.ivanstanojevic.me/api/tle/52191?api_key=8rsVZgPU1iY5192hd4DPbC1rXv8VEU4eQX432HNl'
+                response = requests.get(url)
+                data = response.json()
+                line1 = data['line1']
+                line2 = data['line2']
+                satellite = ephem.readtle('SUCHAI-3', line1, line2)
+                time = ephem.now()
+                time = ephem.localtime(time)
+                satellite.compute(time)
+            except Exception as e:
+                return Response(status_code=500, content=str(e))    
+            return {"satellite": satellite_id, "location": {"latitude": str(satellite.sublat), "longitude": str(satellite.sublong), "timestamp": str(time)}}
+        except AuthError as e:
+            return Response(status_code=e.status_code, content=e.message)    
+    elif satellite_id == "PlantSAT":
+        try:
+            try:
+                url = 'https://tle.ivanstanojevic.me/api/tle/52188?api_key=8rsVZgPU1iY5192hd4DPbC1rXv8VEU4eQX432HNl'
+                response = requests.get(url)
+                data = response.json()
+                line1 = data['line1']
+                line2 = data['line2']
+                satellite = ephem.readtle('PlantSAT', line1, line2)
+                time = ephem.now()
+                time = ephem.localtime(time)
+                satellite.compute(time)
+            except Exception as e:
+                return Response(status_code=500, content=str(e))    
+            return {"satellite": satellite_id, "location": {"latitude": str(satellite.sublat), "longitude": str(satellite.sublong), "timestamp": str(time)}}
+        except AuthError as e:
+            return Response(status_code=e.status_code, content=e.message)
+    
+    return Response(status_code=404, content="Satellite not found")

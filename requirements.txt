@@ -5,3 +5,5 @@
 azure-functions
 fastapi
 fastapi_microsoft_identity
+ephem
+requests
