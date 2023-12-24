@@ -7,3 +7,5 @@ fastapi
 fastapi_microsoft_identity
 ephem
 requests
+azure.identity
+azure.keyvault.secrets

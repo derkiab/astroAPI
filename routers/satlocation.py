@@ -1,9 +1,21 @@
 import logging
 from fastapi import APIRouter, Request, Response, Depends, HTTPException, status
+import fastapi
 from fastapi.security import APIKeyQuery,OAuth2PasswordBearer
 from fastapi_microsoft_identity import initialize, requires_auth, AuthError, validate_scope
 import requests
 import ephem
+from azure.identity import ManagedIdentityCredential
+from azure.keyvault.secrets import SecretClient
+
+
+credential = ManagedIdentityCredential()
+key_vault_url = "https://astroapi-vault.vault.azure.net/"
+client = SecretClient(vault_url=key_vault_url, credential=credential)
+secret_name = "apikey"
+retrieved_secret = client.get_secret(secret_name)
+
+
 
 api_key_query = APIKeyQuery(name="api_key", auto_error=True)
 
@@ -22,14 +34,19 @@ def validate_api_key(api_key: str = Depends(api_key_query)):
             detail="Invalid API Key",
         )
     return api_key
-
-@requires_auth(expected_scope)
+#Commented lines are for authentication of Azure AD B2C OAUTH2.0
+#@requires_auth
 @router.get("/{satellite_id}")
-async def get_satellite_location(satellite_id: str, api_key: str = Depends(validate_api_key)):
+async def get_satellite_location(request: Request,satellite_id: str, api_key: str = Depends(validate_api_key)):
+    #try:
+    #   validate_scope(expected_scope, request)
+    #except AuthError as ae:
+    #   return fastapi.Response(content=ae.error_msg, status_code=ae.status_code)
     if satellite_id.upper() == "ISS":
         try:
+            
             try:
-                url = 'https://tle.ivanstanojevic.me/api/tle/25544?api_key=8rsVZgPU1iY5192hd4DPbC1rXv8VEU4eQX432HNl'
+                url = f"https://tle.ivanstanojevic.me/api/tle/25544?api_key={retrieved_secret.value}"
                 response = requests.get(url)
                 data = response.json()
                 line1 = data['line1']
@@ -40,13 +57,13 @@ async def get_satellite_location(satellite_id: str, api_key: str = Depends(valid
                 satellite.compute(time)
             except Exception as e:
                 return Response(status_code=500, content=str(e))    
-            return {"satellite": satellite_id, "location": {"latitude": str(satellite.sublat), "longitude": str(satellite.sublong), "timestamp": str(time)}}
+            return {"satellite": satellite_id, "location": {"latitude": str(satellite.sublat), "longitude": str(satellite.sublong), "elevation": str(satellite.elevation), "timestamp": str(time)}}
         except AuthError as e:
             return Response(status_code=e.status_code, content=e.message)
     elif satellite_id.upper() == "SUCHAI":
         try:
             try:
-                url = 'https://tle.ivanstanojevic.me/api/tle/42788?api_key=8rsVZgPU1iY5192hd4DPbC1rXv8VEU4eQX432HNl'
+                url = f"https://tle.ivanstanojevic.me/api/tle/42788?api_key={retrieved_secret.value}"
                 response = requests.get(url)
                 data = response.json()
                 line1 = data['line1']
@@ -57,13 +74,13 @@ async def get_satellite_location(satellite_id: str, api_key: str = Depends(valid
                 satellite.compute(time)
             except Exception as e:
                 return Response(status_code=500, content=str(e))    
-            return {"satellite": satellite_id, "location": {"latitude": str(satellite.sublat), "longitude": str(satellite.sublong), "timestamp": str(time)}}
+            return {"satellite": satellite_id, "location": {"latitude": str(satellite.sublat), "longitude": str(satellite.sublong), "elevation": str(satellite.elevation), "timestamp": str(time)}}
         except AuthError as e:
             return Response(status_code=e.status_code, content=e.message)
     elif satellite_id.upper() == "SUCHAI-2":
         try:
             try:
-                url = 'https://tle.ivanstanojevic.me/api/tle/52192?api_key=8rsVZgPU1iY5192hd4DPbC1rXv8VEU4eQX432HNl'
+                url = url = f"https://tle.ivanstanojevic.me/api/tle/52192?api_key={retrieved_secret.value}"
                 response = requests.get(url)
                 data = response.json()
                 line1 = data['line1']
@@ -74,13 +91,13 @@ async def get_satellite_location(satellite_id: str, api_key: str = Depends(valid
                 satellite.compute(time)
             except Exception as e:
                 return Response(status_code=500, content=str(e))    
-            return {"satellite": satellite_id, "location": {"latitude": str(satellite.sublat), "longitude": str(satellite.sublong), "timestamp": str(time)}}
+            return {"satellite": satellite_id, "location": {"latitude": str(satellite.sublat), "longitude": str(satellite.sublong), "elevation": str(satellite.elevation), "timestamp": str(time)}}
         except AuthError as e:
             return Response(status_code=e.status_code, content=e.message)
     elif satellite_id.upper() == "SUCHAI-3":
         try:
             try:
-                url = 'https://tle.ivanstanojevic.me/api/tle/52191?api_key=8rsVZgPU1iY5192hd4DPbC1rXv8VEU4eQX432HNl'
+                url = f"https://tle.ivanstanojevic.me/api/tle/52191?api_key={retrieved_secret.value}"
                 response = requests.get(url)
                 data = response.json()
                 line1 = data['line1']
@@ -91,13 +108,13 @@ async def get_satellite_location(satellite_id: str, api_key: str = Depends(valid
                 satellite.compute(time)
             except Exception as e:
                 return Response(status_code=500, content=str(e))    
-            return {"satellite": satellite_id, "location": {"latitude": str(satellite.sublat), "longitude": str(satellite.sublong), "timestamp": str(time)}}
+            return {"satellite": satellite_id, "location": {"latitude": str(satellite.sublat), "longitude": str(satellite.sublong), "elevation": str(satellite.elevation), "timestamp": str(time)}}
         except AuthError as e:
             return Response(status_code=e.status_code, content=e.message)    
     elif satellite_id == "PlantSAT":
         try:
             try:
-                url = 'https://tle.ivanstanojevic.me/api/tle/52188?api_key=8rsVZgPU1iY5192hd4DPbC1rXv8VEU4eQX432HNl'
+                url = f"https://tle.ivanstanojevic.me/api/tle/52188?api_key={retrieved_secret.value}"
                 response = requests.get(url)
                 data = response.json()
                 line1 = data['line1']
@@ -108,7 +125,7 @@ async def get_satellite_location(satellite_id: str, api_key: str = Depends(valid
                 satellite.compute(time)
             except Exception as e:
                 return Response(status_code=500, content=str(e))    
-            return {"satellite": satellite_id, "location": {"latitude": str(satellite.sublat), "longitude": str(satellite.sublong), "timestamp": str(time)}}
+            return {"satellite": satellite_id, "location": {"latitude": str(satellite.sublat), "longitude": str(satellite.sublong), "elevation": str(satellite.elevation), "timestamp": str(time)}}
         except AuthError as e:
             return Response(status_code=e.status_code, content=e.message)
     
