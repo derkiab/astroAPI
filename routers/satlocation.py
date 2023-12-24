@@ -18,6 +18,7 @@ retrieved_secret = client.get_secret(secret_name)
 retrieved_secret2 = client.get_secret(secret_name2)
 api_key_query = APIKeyQuery(name="api_key", auto_error=True)
 
+
 router = APIRouter()
 #Commented lines are for authentication of Azure AD B2C OAUTH2.0
 #initialize(
@@ -27,7 +28,7 @@ router = APIRouter()
 #expected_scope = ""
 
 def validate_api_key(api_key: str = Depends(api_key_query)):
-    if api_key != retrieved_secret2:
+    if api_key != retrieved_secret2.value:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid API Key",
