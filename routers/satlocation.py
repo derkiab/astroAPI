@@ -27,7 +27,7 @@ router = APIRouter()
 #expected_scope = ""
 
 def validate_api_key(api_key: str = Depends(api_key_query)):
-    if api_key != f"{retrieved_secret2}":
+    if api_key != retrieved_secret2:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid API Key",
