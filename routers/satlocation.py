@@ -13,28 +13,27 @@ credential = ManagedIdentityCredential()
 key_vault_url = "https://astroapi-vault.vault.azure.net/"
 client = SecretClient(vault_url=key_vault_url, credential=credential)
 secret_name = "apikey"
+secret_name2 = "apikey2"
 retrieved_secret = client.get_secret(secret_name)
-
-
-
+retrieved_secret2 = client.get_secret(secret_name2)
 api_key_query = APIKeyQuery(name="api_key", auto_error=True)
 
-
 router = APIRouter()
-initialize(
-    tenant_id_="8953f2c0-cb9d-4969-926b-c4726bd5de68",
-    client_id_="94a86940-adf4-4001-9388-cefaf3c8001d"
-)
-expected_scope = "data.read"
+#Commented lines are for authentication of Azure AD B2C OAUTH2.0
+#initialize(
+ #   tenant_id_="",
+  #  client_id_=""
+#)
+#expected_scope = ""
 
 def validate_api_key(api_key: str = Depends(api_key_query)):
-    if api_key != "6bfced44-72df-487e-9003-8f40cf266628":
+    if api_key != f"{retrieved_secret2}":
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid API Key",
         )
     return api_key
-#Commented lines are for authentication of Azure AD B2C OAUTH2.0
+
 #@requires_auth
 @router.get("/{satellite_id}")
 async def get_satellite_location(request: Request,satellite_id: str, api_key: str = Depends(validate_api_key)):
