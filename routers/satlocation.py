@@ -27,7 +27,7 @@ router = APIRouter()
 #expected_scope = ""
 
 def validate_api_key(api_key: str = Depends(api_key_query)):
-    if api_key != f"{retrieved_secret2}":
+    if api_key != retrieved_secret2:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid API Key",
@@ -110,7 +110,7 @@ async def get_satellite_location(request: Request,satellite_id: str, api_key: st
             return {"satellite": satellite_id, "location": {"latitude": str(satellite.sublat), "longitude": str(satellite.sublong), "elevation": str(satellite.elevation), "timestamp": str(time)}}
         except AuthError as e:
             return Response(status_code=e.status_code, content=e.message)    
-    elif satellite_id == "PlantSAT":
+    elif satellite_id.upper() == "PLANTSAT":
         try:
             try:
                 url = f"https://tle.ivanstanojevic.me/api/tle/52188?api_key={retrieved_secret.value}"
