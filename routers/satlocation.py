@@ -34,12 +34,14 @@ def validate_api_key(request: Request,api_key: str = Depends(api_key_query)):
     if request.client.host == retrieved_secret3.value:
         return api_key
     
-    if api_key != retrieved_secret2.value:
+    elif request.client.host != retrieved_secret3.value and api_key != retrieved_secret2.value:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid API Key",
         )
-    return api_key
+    elif api_key == retrieved_secret2.value:    
+        return api_key
+    
 
 #@requires_auth
 @router.get("/{satellite_id}")
