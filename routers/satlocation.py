@@ -31,17 +31,15 @@ router = APIRouter()
 
 def validate_api_key(request: Request,api_key: str = Depends(api_key_query)):
     
-    if request.client.host == retrieved_secret3.value:
+    if request.client.host == 'https://www.derquisanhueza.cl':
         return api_key
     
-    elif request.client.host != retrieved_secret3.value and api_key != retrieved_secret2.value:
+    elif api_key != retrieved_secret2.value:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid API Key",
         )
-    elif api_key == retrieved_secret2.value:    
-        return api_key
-    
+    return api_key
 
 #@requires_auth
 @router.get("/{satellite_id}")
