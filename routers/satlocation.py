@@ -14,10 +14,8 @@ key_vault_url = "https://astroapi-vault.vault.azure.net/"
 client = SecretClient(vault_url=key_vault_url, credential=credential)
 secret_name = "apikey"
 secret_name2 = "apikey2"
-secret_name3 = "client-app"
 retrieved_secret = client.get_secret(secret_name)
 retrieved_secret2 = client.get_secret(secret_name2)
-retrieved_secret3 = client.get_secret(secret_name3)
 api_key_query = APIKeyQuery(name="api_key", auto_error=True)
 
 
@@ -29,17 +27,23 @@ router = APIRouter()
 #)
 #expected_scope = ""
 
-def validate_api_key(request: Request,api_key: str = Depends(api_key_query)):
+def validate_api_key(request: Request, api_key: str = Depends(api_key_query)):
     
-    if request.client.host == 'https://www.derquisanhueza.cl':
+    if api_key == retrieved_secret2.value or validate_origin_url(request):
         return api_key
-    
-    elif api_key != retrieved_secret2.value:
+    else:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid API Key",
         )
-    return api_key
+
+def validate_origin_url(request):
+    
+    if request.headers.get("referer") == "https://www.derquisanhueza.cl":
+        return True
+    else:
+        return False
+    
 
 #@requires_auth
 @router.get("/{satellite_id}")
